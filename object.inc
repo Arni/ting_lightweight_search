@@ -54,4 +54,40 @@
     return !empty($object->ownerId) ? $object->ownerId : FALSE;
   }
   
+  function getObjectDate($object) {
+    return !empty($object->record['dc:date']) ? $object->record['dc:date'][''][0] : FALSE;
+  }
+  
+  function getSerieNumber($object) {
+    $serie = splitSerie($object);
+    // Last part is the number.
+    if (empty($serie[1])) {
+      return FALSE;
+    }
+    return $serie[1];
+  }
+
+  function splitSerie($object) {
+    $serie = !empty($object->record['dc:title']['dkdcplus:series'][0]) ? $object->record['dc:title']['dkdcplus:series'][0] : '';
+    return explode(';', $serie);
+  }
+
+  function getSerieTitle($object) {
+    $serie = splitSerie($object);
+    // First part is the title.
+    if (empty($serie[0])) {
+      return FALSE;
+    }
+    return trim($serie[0]);
+  }
+  
+ function getSerieDescription($object) {
+    $serie = !empty($object->record['dc:description']['dkdcplus:series'][0]) ? $object->record['dc:description']['dkdcplus:series'][0] : '';
+    return process_series_description($serie);
+  }
+  
+  
+
+
+  
   ?>

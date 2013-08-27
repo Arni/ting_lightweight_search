@@ -19,10 +19,13 @@ require "./lib/log/TingClientLogger.php";
 require "./lib/log/TingClientVoidLogger.php"; 
 require "./lib/nanosoap/nanosoap.inc"; 
 
-$query = $_REQUEST['q'];
-$search_results = ting_do_search($query);
-$results = parse_search_results($search_results);
-$output = my_theme_search($results); 
+$query = $_REQUEST['searchquery'];
+$output = '';
+if ($query) {
+  $search_results = ting_do_search($query);
+  $results = parse_search_results($search_results);
+  $output = my_theme_search($results);
+}
 
 echo $output;
 
@@ -38,29 +41,119 @@ function my_theme($template, $vars) {
 }
 
 function my_theme_search($results) {
-  $items =array();
+  $items = array();
   foreach ($results as $result) {
     $vars = array();
-    $collection_link_part = '<a href="/ting/collection/' . $result['owner_id'] . ':' . $result['local_id'] . '">';
+    $collection_link = '/ting/collection/' . $result['owner_id'] . ':' . $result['local_id'];
     if (isset($result['title'])) {
-      $vars['title_link'] = $collection_link_part  . $result['title'] . '</>';
+      $vars['title_link'] = l($result['title'], $collection_link);
     }
-    $image = '<img src="https://www.randersbib.dk/ting/covers/collection/80_x/' . $result['owner_id'] . ':' . $result['local_id'] . '">'; 
-    $vars['image'] = $collection_link_part  . $image . '</>';
-    //<a class="author" href="/search/ting/dc.creator%3DMaeve%20Binchy">Maeve Binchy</a>
+    
+    $image_src = 'https://www.randersbib.dk/ting/covers/collection/80_x/' . $result['owner_id'] . ':' . $result['local_id'];
+    $image = '<img src="' . $image_src . '">';
+    $vars['image'] = l($image , $collection_link);
+
     if (isset($result['creators']) && !empty($result['creators'])) {
-              //file_put_contents("/home/quickstart/work/debug/debugperf3.txt", print_r($result['creators'] , TRUE), FILE_APPEND);
       $creators = 'Af ';
       foreach ($result['creators'] as $creator) {
-        $creators .= '<a class="author" href="/search/ting/dc.creator=' . $creator . '"> ' . $creator . '</a> ';
+        $creators .=  l ($creator, '/search/ting/dc.creator=' . $creator  ,"author" ); //'<a class="author" href="/search/ting/dc.creator=' . $creator . '"> ' . $creator . '</a> ';
       }
       $vars['creators'] = $creators;
     }
+    
+    $vars['abstract'] = $result['abstract'];
+    $vars['date'] = ' ( ' . $result['date'] . ')';
+    
+    if ($result['serie_title']) {
+      $serie_search = check_plain(str_replace('@serietitle', $result['serie_title'], 'bib.titleSeries="@serietitle" OR dc.description="@serietitle"'));
+      $vars['serie'] =  l($result['serie_title'], '/search/ting/' . $serie_search , "series"); 
+    } else if ($result['serie_description']) {
+      $vars['serie'] = $result['serie_description'];
+    }
+    
+    if ($result['subjects']) {
+      $subjects = array();
+      foreach ($result['subjects'] as $subject) {
+        $subjects[] = l ($subject, '/search/ting/dc.subject=' . $subject, "subject");
+      }
+      $vars['subjects'] = $subjects;
+    }
+    //<li id="availability-77300027963390-dvd" class="availability dvd  pending first last"><a href="/ting/object/773000%3A27963390">Dvd</a></li>
+    if ($result['types']) {
+      $types = array();
+      foreach ($result['types'] as $type) {
+        $id = 'availability-' . $type['owner_id'] . $type['local_id'] . '-' . $type['type'];
+        $class = 'availability ' . $type['type'] . ' pending ';
+        if ($type['count'] == 1) {
+           $path = '/ting/object/' . $type['owner_id'] . ':' . $type['local_id']; 
+        } else {
+          $path = '/ting/collection/' . $type['owner_id'] . ':' . $type['local_id']; 
+        }
+        $types[] = '<li id="' . $id . '" class="' . $class . '">' . l($type['type'] . ' ' .$type['count'], $path) . '</li>';
+      }
+      $vars['types'] = $types;
+    }
+    
+    
     $items[] = my_theme('./item-template.php', $vars);
   }
   $output = my_theme('./search_page_template.php', array('items' => $items));
   return $output;
 }
+
+function l($text, $path, $html_class = NULL) {
+  if ($text && $path) {
+    $link = '<a href="' . check_plain($path) . '"';
+    if ($html_class) {
+      $link .= ' class="' . $html_class . '" ';
+    }
+    $link .= '>' . $text . '</a>';
+    return $link;
+  }
+}
+
+function check_plain($text) {
+  return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+  /**
+   * Process series information
+   * This could be handled more elegantly if we had better structured data.
+   * For now we have to work with what we got to convert titles to links
+   * Series information appear in the following formats:
+   * - Samhørende: [title 1] ; [title 2] ; [title 3]
+   * - [volumne number]. del af: [title]
+   */
+  function process_series_description($series) {
+    $result = '';
+    $parts = explode(':', $series);
+
+    if (is_array($parts) && count($parts >= 2)) {
+      $prefix = $parts[0] . ': ';
+
+      if (stripos($prefix, 'del af:') !== FALSE) {
+        $title = $parts[1];
+        $result = $prefix . l($title, '/search/ting/' . '"' . $title . '"');
+      } else if (stripos($prefix, 'Samhørende:') !== FALSE) {
+
+        $titles = $parts[1];
+        // Multiple titles are separated by ' ; '. Explode to iterate over them
+        $titles = explode(' ; ', $titles);
+        foreach ($titles as &$title) {
+          $title = trim($title);
+          // Some title elements are actually volumne numbers. Do not convert these to links
+          if (!preg_match('/(nr.)? \d+/i', $title)) {
+            $title = l($title, '/search/ting/' . '"' . $title . '"');
+          }
+        }
+        // Reassemple titles
+        $titles = implode(', ', $titles);
+        $result = $prefix . ' ' . $titles;
+      }
+    }
+
+    return $result;
+  }
 
 
 function ting_do_search($query, $page = 1, $results_per_page = 10, $options = array()) {
@@ -91,7 +184,7 @@ function ting_do_search($query, $page = 1, $results_per_page = 10, $options = ar
   }
   $request->setAllObjects(isset($options['allObjects']) ? $options['allObjects'] : FALSE);
 
-  $request->setProfile("opac");
+  $request->setProfile("test");
 
 
   // Apply custom ranking if enabled.
@@ -162,23 +255,49 @@ function ting_do_search($query, $page = 1, $results_per_page = 10, $options = ar
 function parse_search_results($results) {
   require './object.inc';
   $output = array();
-  foreach ($results->collections as $collection) {
-    
-    //file_put_contents("/home/quickstart/work/debug/debugperf1.txt", print_r($collection , TRUE), FILE_APPEND);
+  foreach ($results->collections as $collection) {    
     if (isset($collection->objects[0])) {
       $object = $collection->objects[0];
       $output[] = array(
-       'title' => getTitle($object),
+       'title'    => getTitle($object),
        'creators' => getCreators($object),
        'subjects' => getSubjects($object),
        'abstract' => getAbstract($object),
-       'type' => getObjectType($object), //TODO multiple types
        'local_id' => getLocalId($object),
        'owner_id' => getOwnerId($object),
+       'date'     => getObjectDate($object),
+       'serie_title' => getSerieTitle($object),
+       'serie_description' => getSerieDescription($object),
+       'types' => process_types ($collection),
       );
-    }   
+    } 
+
   }
   return $output;
+}
+
+function process_types($collection) {
+  $types = array();
+  foreach ($collection->objects as $object) {
+    $type_value = getObjectType($object);
+    $type_exists_allready = false;
+    foreach ($types as &$type) {
+       if ($type['type'] == $type_value) {
+          $type_exists_allready = true;
+          $type['count'] = $type['count'] + 1;
+          break;
+       }
+    }
+    if (!$type_exists_allready) {
+      $types[] = array(
+        'type' => $type_value,
+        'local_id' => getLocalId($object),
+        'owner_id' => getOwnerId($object),
+        'count' => 1,
+      );
+    }
+  }
+  return $types;
 }
 
 /**

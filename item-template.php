@@ -20,21 +20,38 @@
           </h2>
         </div>
         <div class="content">
-            <?php if (isset($creators)) { print $creators; }?>
-          (2009)</div>
-        <div class="content"></div>
+           <?php if (isset($creators)) { print $creators; }?>
+           <?php if (isset($date)) { print $date; }?>
+        </div>
+        <div class="content">
+           <?php if (isset($abstract)) { print $abstract; }?>
+        </div>
+        <?php if (isset($serie)) : ?>
         <div class="field field-name-ting-series field-type-ting-series field-label-inline clearfix">
           <div class="field-label">Series:&nbsp;</div>
           <div class="field-items">
-            <div class="field-item even"><a class="series" href="/search/ting/bib.titleSeries%3D%22politikens%20visuelle%20guides%22%20OR%20dc.description%3D%22politikens%20visuelle%20guides%22">Politikens visuelle guides</a> : </div>
+            <div class="field-item even">
+              <?php  print $serie; ?>
+              : </div>
           </div>
         </div>
+        <?php  endif ; ?>
+        <?php if (isset($subjects)) : ?>
+        <div class="subjects content">
+          <?php foreach ($subjects as $subject) 
+            print $subject;            
+          ?>         
+        </div>
+        <?php  endif ; ?>
       </div></div>
+    <?php if (isset($types)) : ?>
     <div class="availability content">
       <ul>
-        <li class="availability bog  first last processed available reservable" id="availability-77300029238154-bog" title="available">
-          <a href="/ting/collection/773000%3A29238154">Bog<span class="availability-status">available</span></a>
-        </li>
+          <?php foreach ($types as $type): ?> 
+            <?php print $type; ?>             
+          <?php endforeach; ?>  
       </ul> 
-    </div></div>
+    </div>
+    <?php  endif ; ?>
+  </div>
 </li>
