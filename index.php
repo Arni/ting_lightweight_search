@@ -19,23 +19,26 @@ require "./lib/result/search/TingClientFacetResult.php";
 require "./lib/log/TingClientLogger.php"; 
 require "./lib/log/TingClientVoidLogger.php"; 
 require "./lib/nanosoap/nanosoap.inc"; 
-require "./search.inc"; 
-require "./theme.inc"; 
-require "./availability.inc";
-require "./facets.inc";
+require "./includes/search.inc"; 
+require "./includes/object.inc"; 
+require "./includes/theme.inc"; 
+require "./includes/availability.inc";
+require "./includes/facets.inc";
 
 $query = $_REQUEST['searchquery'];
 $output = '';
 if ($query) {
   $search_results = ting_do_search($query);
-  file_put_contents("/home/quickstart/work/debug/debugperf8.txt", print_r($search_results->facets , TRUE), FILE_APPEND);
   $results = parse_search_results($search_results);
   $facets = process_facets($search_results->facets, $query, '/search/ting/' . $query);
-  file_put_contents("/home/quickstart/work/debug/debugperf9.txt", print_r($facets , TRUE), FILE_APPEND);
   $output = theme_results ($results, $facets);
+  $availability = process_availability($results);
 }
 
-echo $output;
+header('Content-Type: application/json');
+$json_output = array("result_html" => $output, "availability" => $availability );
+echo json_encode($json_output, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+
 
   /**
    * Process series information
@@ -79,7 +82,6 @@ echo $output;
 
 
 function parse_search_results($results) {
-  require './object.inc';
   $output = array();
   foreach ($results->collections as $collection) {    
     if (isset($collection->objects[0])) {

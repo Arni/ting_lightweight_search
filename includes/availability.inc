@@ -2,22 +2,17 @@
 
 function process_availability($results) {
   //"ding_availability":{"availability-77300090009869-bog":["90009869"],"availability-77300090430505-bog":["90430505","45226492"],"availability-77300024346196-bog":["24346196","25102886","41464887"],"availability-77300043835440-bog":["43835440"],"availability-77300042017078-bog":["42017078"],"availability-77300043393588-bog":["43393588"],"availability-77300024869547-bog":["24869547"],"availability-77300022630377-bog":["22630377"]}
-  $availability_ajax_settings = '"ding_availability":{';
+  $availability_settings = array();
   foreach ($results as $result) {
     foreach ($result['types'] as $type) {
       if (!empty($type['object_ids'])) {
-        $availability_setting = '"' . availability_id($type) . '":[';
         foreach ($type['object_ids'] as $object_id) {
-          $availability_setting .= '"' . $object_id . '",';
+          $availability_settings[availability_id($type)][] =  $object_id;
         }
-        $availability_setting .= '],';
-        $availability_ajax_settings .= $availability_setting;
       }
     }
   }
-  rtrim ($availability_ajax_settings, ',');
-  $availability_ajax_settings .= '}';
-  return $availability_ajax_settings;
+  return array("ding_availability" => $availability_settings);
 }
 
 function availability_text($type) {

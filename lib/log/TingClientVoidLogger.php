@@ -5,7 +5,7 @@
  */
 class TingClientVoidLogger extends TingClientLogger {
   protected function doLog($message, $severity) {
-    var_dump($message);
+    //var_dump($message);
     //Do nothing
   }
 }

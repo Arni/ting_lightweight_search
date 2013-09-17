@@ -4,7 +4,7 @@ function theme_results ($results, $facets) {
   $vars = array();
   my_theme_search($results, &$vars);
   theme_facets($facets, &$vars);
-  return my_theme('./search_page_template.php', $vars);  
+  return my_theme('./templates/search_page_template.php', $vars);  
 }
 
 function my_theme($template, $vars) {
@@ -70,10 +70,10 @@ function my_theme_search($results, $vars) {
       }
       $vars['types'] = $types;
     }
-    $items[] = my_theme('./item-template.php', $vars);
+    $items[] = my_theme('./templates/item-template.php', $vars);
   }
   $vars['items'] = $items;
-  $vars['availability'] = process_availability($results);
+ 
 }
 
 function theme_facets($facets, $vars) {
@@ -91,7 +91,7 @@ function theme_facets($facets, $vars) {
     }
     }
   }
-  $vars['facet_browser'] =  my_theme('./facets-template.php', array('facets' => $facets));
+  $vars['facet_browser'] =  my_theme('./templates/facets-template.php', array('facets' => $facets));
 }
 
 function l($text, $path, $html_class = NULL) {
