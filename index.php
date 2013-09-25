@@ -24,6 +24,7 @@ require "./includes/object.inc";
 require "./includes/theme.inc"; 
 require "./includes/availability.inc";
 require "./includes/facets.inc";
+require "./includes/pager.inc";
 
 $query = $_REQUEST['searchquery'];
 $output = '';
@@ -31,7 +32,9 @@ if ($query) {
   $search_results = ting_do_search($query);
   $results = parse_search_results($search_results);
   $facets = process_facets($search_results->facets, $query, '/search/ting/' . $query);
-  $output = theme_results ($results, $facets);
+  $more_pages = ($search_results->more ? 1 : 0);
+  $pager = make_pager(1, 1 + $more_pages, $query);
+  $output = theme_results ($results, $facets, $pager);
   $availability = process_availability($results);
 }
 

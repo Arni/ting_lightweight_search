@@ -99,11 +99,16 @@
                   }
                   ?> 
                 </ul>
-                <ul class="pager"><li class="pager-previous first">&nbsp;</li>
-                  <li class="pager-current">1</li>
-                  <li class="pager-item"><a title="Gå til side 2" href="/search/ting/dublin%20bog?page=1">2</a></li>
-                  <li class="pager-next last"><a title="Gå til næste side" href="/search/ting/dublin%20bog?page=1">næste ›</a></li>
-                </ul>  </div>
+                <ul class="pager">
+                  <?php if ($pager) : ?> 
+                    <?php foreach ($pager as $pager_item): ?> 
+                      <?php print $pager_item; ?>             
+                    <?php endforeach; ?>  
+                  <?php endif; ?>  
+
+                </ul>
+
+              </div>
             </div>
 
 

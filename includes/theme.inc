@@ -1,9 +1,10 @@
 <?php
 
-function theme_results ($results, $facets) {
+function theme_results ($results, $facets, $pager) {
   $vars = array();
   my_theme_search($results, &$vars);
   theme_facets($facets, &$vars);
+  $vars['pager'] = $pager;
   return my_theme('./templates/search_page_template.php', $vars);  
 }
 

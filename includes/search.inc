@@ -19,7 +19,7 @@ function ting_do_search($query, $page = 1, $results_per_page = 10, $options = ar
 //  }
 
   $request->setFacets(array('facet.subject', 'facet.creator', 'facet.type', 'facet.category', 'facet.language', 'facet.date', 'facet.acSource', 'facet.branch'));
-  //$request->setNumFacets((isset($options['numFacets'])) ? $options['numFacets'] : ((sizeof($request->getFacets()) == 0) ? 0 : 10));
+  $request->setNumFacets( 10);
   //if (isset($options['sort']) && $options['sort']) {
    // $request->setSort($options['sort']);
   //}
@@ -28,7 +28,7 @@ function ting_do_search($query, $page = 1, $results_per_page = 10, $options = ar
   }
   $request->setAllObjects(isset($options['allObjects']) ? $options['allObjects'] : FALSE);
 
-  $request->setProfile("test");
+  $request->setProfile("opac");
 
 
   // Apply custom ranking if enabled.
