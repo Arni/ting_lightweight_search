@@ -13,4 +13,5 @@ function ting_lightweight_search_init(){
       'number_of_terms' => variable_get('ding_facetbrowser_number_of_terms', 5),
     )
   ), 'setting');
+  //drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/jquery.history.js');
 }
