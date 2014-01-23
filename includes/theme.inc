@@ -5,7 +5,7 @@ function theme_results ($results, $facets, $pager) {
   my_theme_search($results, &$vars);
   theme_facets($facets, &$vars);
   $vars['pager'] = $pager;
-  return my_theme('./templates/search_page_template.php', $vars);  
+  return my_theme('./ting_lightweight_search/templates/search_page_template.php', $vars);  
 }
 
 function my_theme($template, $vars) {
@@ -23,17 +23,17 @@ function my_theme_search($results, $vars) {
     $vars = array();
     $collection_link = '/ting/collection/' . $result['owner_id'] . ':' . $result['local_id'];
     if (isset($result['title'])) {
-      $vars['title_link'] = l($result['title'], $collection_link);
+      $vars['title_link'] = my_l($result['title'], $collection_link);
     }
 
     $image_src = 'https://test.randersbib.dk/profiles/ding/modules/ting/modules/ting_covers/index.php?ownerid=' . $result['owner_id'] . '&objectid=' . $result['local_id'];
     $image = '<img src="' . $image_src . '">';
-    $vars['image'] = l($image, $collection_link);
+    $vars['image'] = my_l($image, $collection_link);
 
     if (isset($result['creators']) && !empty($result['creators'])) {
       $creators = 'Af ';
       foreach ($result['creators'] as $creator) {
-        $creators .= l($creator, '/search/ting/dc.creator=' . $creator, "author"); //'<a class="author" href="/search/ting/dc.creator=' . $creator . '"> ' . $creator . '</a> ';
+        $creators .= my_l($creator, '/search/ting/dc.creator=' . $creator, "author"); //'<a class="author" href="/search/ting/dc.creator=' . $creator . '"> ' . $creator . '</a> ';
       }
       $vars['creators'] = $creators;
     }
@@ -43,7 +43,7 @@ function my_theme_search($results, $vars) {
 
     if ($result['serie_title']) {
       $serie_search = check_plain(str_replace('@serietitle', $result['serie_title'], 'bib.titleSeries="@serietitle" OR dc.description="@serietitle"'));
-      $vars['serie'] = l($result['serie_title'], '/search/ting/' . $serie_search, "series");
+      $vars['serie'] = my_l($result['serie_title'], '/search/ting/' . $serie_search, "series");
     } else if ($result['serie_description']) {
       $vars['serie'] = $result['serie_description'];
     }
@@ -51,7 +51,7 @@ function my_theme_search($results, $vars) {
     if ($result['subjects']) {
       $subjects = array();
       foreach ($result['subjects'] as $subject) {
-        $subjects[] = l($subject, '/search/ting/dc.subject=' . $subject, "subject");
+        $subjects[] = my_l($subject, '/search/ting/dc.subject=' . $subject, "subject");
       }
       $vars['subjects'] = $subjects;
     }
@@ -67,11 +67,11 @@ function my_theme_search($results, $vars) {
           $path = '/ting/collection/' . $type['owner_id'] . ':' . $type['local_id'];
         }
 
-        $types[] = '<li id="' . $id . '" class="' . $class . '">' . l(availability_text($type['type']), $path) . '</li>';
+        $types[] = '<li id="' . $id . '" class="' . $class . '">' . my_l(availability_text($type['type']), $path) . '</li>';
       }
       $vars['types'] = $types;
     }
-    $items[] = my_theme('./templates/item-template.php', $vars);
+    $items[] = my_theme('./ting_lightweight_search/templates/item-template.php', $vars);
   }
   $vars['items'] = $items;
  
@@ -86,18 +86,18 @@ function theme_facets($facets, $vars) {
       $markup .= '<input type="checkbox" id="edit-' . $facet_name . '-' . $term_name . '" name="' . $facet_name . '[' . $term_name . ']" value="' . $term_name . '" class="form-checkbox" />';
       $markup .= '<label class="option" for="edit-' . $facet_name . '-' . $term_name . '"> ';
       $link_text = $term['term_name_title'] . ' <span class="count">(' . $term['term_count'] . ')</span>';
-      $markup .= l($link_text, $term['link']); //<a href="http://ding2tal.dev/search/ting/dublin%20bog?facets[]=facet.branch%3Adrb" title="drb">drb <span class="count">(19)</span></a> 
+      $markup .= my_l($link_text, $term['link']); //<a href="http://ding2tal.dev/search/ting/dublin%20bog?facets[]=facet.branch%3Adrb" title="drb">drb <span class="count">(19)</span></a> 
       $markup .= '</label></div>';
       $term['markup'] = $markup;
     }
     }
   }
-  $vars['facet_browser'] =  my_theme('./templates/facets-template.php', array('facets' => $facets));
+  $vars['facet_browser'] =  my_theme('./ting_lightweight_search/templates/facets-template.php', array('facets' => $facets));
 }
 
-function l($text, $path, $html_class = NULL) {
+function my_l($text, $path, $html_class = NULL) {
   if ($text && $path) {
-    $link = '<a href="' . check_plain($path) . '"';
+    $link = '<a href="' . my_check_plain($path) . '"';
     if ($html_class) {
       $link .= ' class="' . $html_class . '" ';
     }
@@ -106,7 +106,7 @@ function l($text, $path, $html_class = NULL) {
   }
 }
 
-function check_plain($text) {
+function my_check_plain($text) {
   return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 

@@ -5,28 +5,34 @@
  * and open the template in the editor.
  */
 
-require "./lib/request/TingClientRequestFactory.php";
-require "./lib/request/TingClientRequest.php";
-require "./lib/request/TingClientSearchRequest.php";
-require "./lib/TingClient.php";
-require "./lib/adapter/TingClientRequestAdapter.php";
-require "./lib/exception/TingClientException.php";
-require "./lib/result/object/TingClientObject.php";
-require "./lib/result/object/TingClientObjectCollection.php";
-require "./lib/result/object/data/TingClientObjectData.php";
-require "./lib/result/search/TingClientSearchResult.php";
-require "./lib/result/search/TingClientFacetResult.php";
-require "./lib/log/TingClientLogger.php"; 
-require "./lib/log/TingClientVoidLogger.php"; 
-require "./lib/nanosoap/nanosoap.inc"; 
-require "./includes/search.inc"; 
-require "./includes/object.inc"; 
-require "./includes/theme.inc"; 
-require "./includes/availability.inc";
-require "./includes/facets.inc";
-require "./includes/pager.inc";
+function load_inc() {
+//$path = drupal_get_path('module', 'ting_ligtweight_search');
+  $path = DRUPAL_ROOT . '/profiles/ding2/modules/ting_lightweight_search';
+file_put_contents("/home/quickstart/work/debug/debuglight2.txt", print_r($path , TRUE), FILE_APPEND);
+require $path . "/lib/request/TingClientRequestFactory.php";
+require $path . "/lib/request/TingClientRequest.php";
+require $path . "/lib/request/TingClientSearchRequest.php";
+require $path . "/lib/TingClient.php";
+require $path . "/lib/adapter/TingClientRequestAdapter.php";
+require $path . "/lib/exception/TingClientException.php";
+require $path . "/lib/result/object/TingClientObject.php";
+require $path . "/lib/result/object/TingClientObjectCollection.php";
+require $path . "/lib/result/object/data/TingClientObjectData.php";
+require $path . "/lib/result/search/TingClientSearchResult.php";
+require $path . "/lib/result/search/TingClientFacetResult.php";
+require $path . "/lib/log/TingClientLogger.php"; 
+require $path . "/lib/log/TingClientVoidLogger.php"; 
+require $path . "/lib/nanosoap/nanosoap.inc"; 
+require $path . "/includes/search.inc"; 
+require $path . "/includes/object.inc"; 
+require $path . "/includes/theme.inc"; 
+require $path . "/includes/availability.inc";
+require $path . "/includes/facets.inc";
+require $path . "/includes/pager.inc";
+}
 
-$query = $_REQUEST['searchquery'];
+function search ($query) {
+  load_inc();
 $output = '';
 if ($query) {
   $search_results = ting_do_search($query);
@@ -40,7 +46,8 @@ if ($query) {
 
 header('Content-Type: application/json');
 $json_output = array("result_html" => $output, "availability" => $availability );
-echo json_encode($json_output, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+return $output;
+}
 
 
   /**
