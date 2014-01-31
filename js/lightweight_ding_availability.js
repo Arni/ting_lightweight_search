@@ -10,6 +10,9 @@
 
   TingAvailability = 
     function(settings) {
+    alert('1');
+    }
+    alert(settings);
     console.log(settings);
       var ids = [];
       var html_ids = [];

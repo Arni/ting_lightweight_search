@@ -1,17 +1,32 @@
 <?php
 
 function ting_lightweight_search_init(){
-  drupal_add_css(drupal_get_path('module', 'ding_availability') . '/css/ding_availability_legend.css');
-  drupal_add_css(drupal_get_path('module', 'ding_availability') . '/css/ding_availability.css');
-  drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/lightweight_ding_availability.js');
-  drupal_add_css(drupal_get_path('module', 'ding_facetbrowser') . '/css/facetbrowser.css');
-  drupal_add_js(drupal_get_path('module', 'ding_facetbrowser') . '/js/jquery.cookie.min.js');
-  drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/facetbrowser.js');
-  drupal_add_js(array(
-    'dingFacetBrowser' => array(
-      'mainElement' => '.pane-ding-facetbrowser',
-      'number_of_terms' => variable_get('ding_facetbrowser_number_of_terms', 5),
-    )
-  ), 'setting');
+
+//  drupal_add_css(drupal_get_path('module', 'ding_availability') . '/css/ding_availability_legend.css');
+//  drupal_add_css(drupal_get_path('module', 'ding_availability') . '/css/ding_availability.css');
+//  drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/lightweight_ding_availability.js');
+//  drupal_add_css(drupal_get_path('module', 'ding_facetbrowser') . '/css/facetbrowser.css');
+//  drupal_add_js(drupal_get_path('module', 'ding_facetbrowser') . '/js/jquery.cookie.min.js');
+//  drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/facetbrowser.js');
+//  drupal_add_js(array(
+//    'dingFacetBrowser' => array(
+//      'mainElement' => '.pane-ding-facetbrowser',
+//      'number_of_terms' => variable_get('ding_facetbrowser_number_of_terms', 5),
+//    )
+//  ), 'setting');
   //drupal_add_js(drupal_get_path('module', 'ting_lightweight_search') . '/js/jquery.history.js');
+}
+
+
+function ting_lightweight_search_exit(){
+    // Do not continue if not fully bootstrapped.
+  if (drupal_get_bootstrap_phase() < DRUPAL_BOOTSTRAP_FULL) {
+    return;
+  }
+
+   //$theme_registry = theme_get_registry();
+   //file_put_contents("/home/quickstart/work/debug/debugexit2.txt", print_r(theme_get_registry() , TRUE), FILE_APPEND);
+   
+   $menu = theme('pane_navigation');
+   $GLOBALS['ting_lightweight_search_exit'] = true;
 }

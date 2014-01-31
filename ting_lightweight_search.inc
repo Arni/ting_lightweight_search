@@ -15,10 +15,15 @@
  *
  * @see _drupal_bootstrap_page_cache()
  */
-
+try {
+  apc_clear_cache();
 $delivered = ting_lightweight_search_builtin_cacheinc_retrieve_cache_page();
 if ($delivered) {
-  exit;
+exit;
+}
+} catch (Exception $e) {
+print $e;
+exit;
 }
 
 /**
@@ -93,9 +98,8 @@ function ting_lightweight_search_builtin_cacheinc_retrieve_cache_page() {
   // within settings.php
 //  if (!variable_get('ting_lightweight_search_builtin_cache_without_database')) {
 
-  drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES, FALSE);
+  drupal_bootstrap(DRUPAL_BOOTSTRAP_VARIABLES, FALSE); 
 //  }
-
   // The following three basic exclusion rules are mirrored in
   // ting_lightweight_search_authcache_request_exclude() in authcache.module
   // BEGIN: basic exclusion rules.
@@ -103,13 +107,10 @@ function ting_lightweight_search_builtin_cacheinc_retrieve_cache_page() {
 //  if (!function_exists('authcache_backend_init') || !authcache_backend_init('authcache_builtin', $vary_header)) {
 //    return FALSE;
 //  }
-
   // Only GET and HEAD requests allowed.
 //  if (!($_SERVER['REQUEST_METHOD'] == 'GET' || $_SERVER['REQUEST_METHOD'] == 'HEAD')) {
 //    return FALSE;
 //  }
-
-
   // Try to retrieve a key when the session cookie is present on the request.
 //  $key = NULL;
 //  if (isset($_COOKIE[session_name()])) {
@@ -138,7 +139,6 @@ function ting_lightweight_search_builtin_cacheinc_retrieve_cache_page() {
 //      return FALSE;
 //    }
 //  }
-
   // Fallback to anonymous content.
 //  if (!$key) {
 //    $generator = variable_get('authcache_key_generator');
@@ -158,31 +158,37 @@ function ting_lightweight_search_builtin_cacheinc_retrieve_cache_page() {
 //    header('X-Drupal-Cache: MISS');
 //    return FALSE;
 //  }
- // else {
-    // Render cache benchmark.
-    if (isset($_COOKIE['cache_render'])) {
-      setcookie('cache_render', timer_read('page'), 0, ini_get('session.cookie_path'), ini_get('session.cookie_domain'), ini_get('session.cookie_secure') == '1');
-    }
-    $path = $_SERVER['REQUEST_URI'];
-    if (substr( $path, 0, 12 ) === "/ting/search") {
+  // else {
+  // Render cache benchmark.
+  if (isset($_COOKIE['cache_render'])) {
+    setcookie('cache_render', timer_read('page'), 0, ini_get('session.cookie_path'), ini_get('session.cookie_domain'), ini_get('session.cookie_secure') == '1');
+  }
+  $path = $_SERVER['REQUEST_URI'];
+  if (substr($path, 0, 12) === "/search/ting") {
     require_once DRUPAL_ROOT . '/profiles/ding2/modules/ting_lightweight_search/index.php';
-    $query = substr( $path, 12);
-    $search = search($query);
-    $cache = (object) array(
-    'data' => array(
-      'body' => '<html>Test ' . $search  .'</html>',
-      'headers' => array(),
-    ),
-    'created' => $created,
-  );
 
-    header('X-Drupal-Cache: HIT');
-    _authcache_builtin_cacheinc_fix_browsers();
-    ting_lightweight_search_serve_page_from_cache($cache, $key);
-    return TRUE;
+    $query = substr($path, 13);
+    $query = rawurldecode($query) ;
+    if ($query && strlen($query) > 0) {
+      $search = search($query);
+      $cache = (object) array(
+          'data' => array(
+            'body' => $search,
+            'headers' => array(),
+          ),
+          'created' => $created,
+      );
+
+      header('X-Drupal-Cache: HIT');
+      _authcache_builtin_cacheinc_fix_browsers();
+      ting_lightweight_search_serve_page_from_cache($cache, $key);
+      return TRUE;
     } else {
       return FALSE;
     }
+  } else {
+    return FALSE;
+  }
   //}
 }
 

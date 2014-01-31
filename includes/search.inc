@@ -18,7 +18,7 @@ function ting_do_search($query, $page = 1, $results_per_page = 10, $options = ar
 //    }
 //  }
 
-  $request->setFacets(array('facet.subject', 'facet.creator', 'facet.type', 'facet.category', 'facet.language', 'facet.date', 'facet.acSource', 'facet.branch'));
+  $request->setFacets(array('facet.subject', 'facet.creator', 'facet.type', 'facet.category', 'facet.language', 'facet.date', 'facet.acSource', 'facet.branch', 'facet.fiction', 'facet.nonFiction', 'facet.dk5'));
   $request->setNumFacets( 10);
   //if (isset($options['sort']) && $options['sort']) {
    // $request->setSort($options['sort']);
